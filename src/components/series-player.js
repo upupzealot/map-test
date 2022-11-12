@@ -8,30 +8,45 @@ export default class Player {
     this.simulatedTime = 0;
     this.frame = null;
 
+    this.route = null;
+    this.updater = null;
+    this.render = null;
     this.simulator = null;
     this.logicTimmer = null;
     this.graphicTimmer = null;
-    this.render = null;
   }
 
-  use(simulator, render) {
+  async init({
+      route,
+      updater,
+      render,
+      simulator }) {
+    this.route = route;
+    this.updater = updater;
     this.simulator = simulator;
     this.render = render;
-  }
-  load(series) {
-    this.series = series;
-    this.totalTime = series.totalTime;
 
-    this.reset();
+    await this.updater.init();
+    await this.reset();
   }
 
   start() {
     console.log('开始播放');
     let last = Date.now();
-    this.logicTimmer = setInterval(() => {
+    let updateTime = 0;
+    this.logicTimmer = setInterval(async () => {
       const now = Date.now();
-      this.playTime += now - last;
+      const dt = now - last;
+      this.playTime += dt
 
+      // 更新 updater
+      updateTime += dt;
+      if(updateTime >= this.updater.interval) {
+        updateTime -= this.updater.interval;
+        await this.updater.update(this.playTime);
+      }
+
+      // 更新 simulator
       const { interval } = this.simulator;
       for(;this.simulatedTime + interval <= this.playTime;) {
         this.frame = this.simulator.update(this.frame, interval);
@@ -54,22 +69,25 @@ export default class Player {
   }
 
   reset() {
-    this.startAt = 0;
     this.playTime = 0;
     this.isPlaying = false;
     if(this.timmer) {
       this.pause();
     }
 
-    this.simulatedCount = 0;
-    const p0 = this.series.get(0);
+    this.startAt = this.updater.series.startAt;
+
+    const p0 = this.updater.current;
     this.frame = {
-      series: this.series,
-      playTime: 0,
-      point: {
-        lng: p0.lng,
-        lat: p0.lat
-      }
+      player: this,
+      updater: this.updater,
+      simulation: {
+        time: 0,
+        point: {
+          lng: p0.lng,
+          lat: p0.lat,
+        }
+      },
     };
   }
 }

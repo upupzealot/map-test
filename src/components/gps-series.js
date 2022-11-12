@@ -12,7 +12,7 @@ export default class Series {
       }
     });
     const first = this.records[0];
-    this.startAt = this.records[0].reportAt;
+    this.startAt = first.reportAt;
     const last = this.records[this.records.length - 1];
     this.totalTime = last.reportAt - this.realStartAt;
   }
