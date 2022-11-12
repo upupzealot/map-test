@@ -31,7 +31,6 @@ export default class Simulator {
     const dt = this.interval / 1000;
     speed += Math.sign(disDiff) * a * dt;
     speed = Math.max(0, speed);
-    // console.log((speed * 3.6).toFixed(2))
     distance += speed * dt;
     
     simulation.speed = speed;

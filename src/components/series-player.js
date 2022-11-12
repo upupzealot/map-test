@@ -74,6 +74,7 @@ export default class Player {
     if(this.logicTimmer) {
       this.pause();
     }
+    this.simulatedTime = 0;
 
     this.startAt = this.source.series.startAt;
 
@@ -82,7 +83,6 @@ export default class Player {
       player: this,
       source: this.source,
       simulation: {
-        time: 0,
         point: {
           lng: p0.lng,
           lat: p0.lat,
