@@ -12,7 +12,7 @@
     "coordtransform": "^2.1.2",
     "core-js": "^3.6.5",
     "lodash": "^4.17.21",
-    "route-correction": "0.0.2",
+    "route-correction": "^0.1.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {

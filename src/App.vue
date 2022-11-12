@@ -188,7 +188,7 @@ export default {
 
         correctedPoint.setCenter(e.lnglat);
         const t0 = Date.now();
-        const nearestRes = this.route.nearestBy(e.lnglat);
+        const nearestRes = this.route.correct(e.lnglat);
         console.log(`纠偏耗时：${Date.now() - t0} ms`, nearestRes)
         const nearestPoint = new AMap.LngLat(nearestRes.point.lng, nearestRes.point.lat); 
         line2CorrectedPoint.setPath([e.lnglat, nearestPoint]);
