@@ -26,7 +26,7 @@ import Route from 'route-correction'
 import routePoints from './data/route-points.json'
 import GpsSeries from './components/gps-series.js'
 import gpsPoints from './data/gps-points.json'
-import GpsUpdater from './components/gps-updater.js'
+import GpsSource from './components/gps-source.js'
 import SeriesSimulator from './components/series-simulator.js'
 import SeriesPlayer from './components/series-player.js'
 
@@ -48,14 +48,14 @@ export default {
     const player = new SeriesPlayer();
 
     const gpsSeries = new GpsSeries(gpsPoints);
-    const updater = new GpsUpdater(gpsSeries, 1000);
+    const source = new GpsSource(gpsSeries, 1000);
 
     const simulator = new SeriesSimulator(50);
     let gpsMarker = null;
     let avgMarker = null;
     let simulationMarker = null;
     const render = function(frame) {
-      const { current } = frame.updater;
+      const { current } = frame.source;
       if(current) {
         const gpsPos = new AMap.LngLat(current.lng, current.lat);
         if(!gpsMarker) {
@@ -70,7 +70,6 @@ export default {
         gpsMarker.setCenter(gpsPos);
       }
       
-
       const { point, avgPoint } = frame.simulation;
       if(avgPoint) {
         const avgPos = new AMap.LngLat(avgPoint.lng, avgPoint.lat);
@@ -103,7 +102,7 @@ export default {
 
     await player.init({
       route: this.route,
-      updater,
+      source,
       render,
       simulator
     });

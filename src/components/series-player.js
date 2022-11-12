@@ -9,7 +9,7 @@ export default class Player {
     this.frame = null;
 
     this.route = null;
-    this.updater = null;
+    this.source = null;
     this.render = null;
     this.simulator = null;
     this.logicTimmer = null;
@@ -18,32 +18,32 @@ export default class Player {
 
   async init({
       route,
-      updater,
+      source,
       render,
       simulator }) {
     this.route = route;
-    this.updater = updater;
+    this.source = source;
     this.simulator = simulator;
     this.render = render;
 
-    await this.updater.init();
+    await this.source.init();
     await this.reset();
   }
 
   start() {
     console.log('开始播放');
     let last = Date.now();
-    let updateTime = 0;
+    let sourceTime = 0;
     this.logicTimmer = setInterval(async () => {
       const now = Date.now();
       const dt = now - last;
       this.playTime += dt
 
-      // 更新 updater
-      updateTime += dt;
-      if(updateTime >= this.updater.interval) {
-        updateTime -= this.updater.interval;
-        await this.updater.update(this.playTime);
+      // 更新 source
+      sourceTime += dt;
+      if(sourceTime >= this.source.interval) {
+        sourceTime -= this.source.interval;
+        await this.source.update(this.playTime);
       }
 
       // 更新 simulator
@@ -75,12 +75,12 @@ export default class Player {
       this.pause();
     }
 
-    this.startAt = this.updater.series.startAt;
+    this.startAt = this.source.series.startAt;
 
-    const p0 = this.updater.current;
+    const p0 = this.source.current;
     this.frame = {
       player: this,
-      updater: this.updater,
+      source: this.source,
       simulation: {
         time: 0,
         point: {

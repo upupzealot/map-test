@@ -1,6 +1,6 @@
 import { wgs84togcj02 as Wgs84ToGcj02 } from 'coordtransform';
 
-export default class Updater {
+export default class Source {
   constructor(series, interval) {
     this.series = series;
     this.interval = interval;
