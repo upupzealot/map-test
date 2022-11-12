@@ -71,7 +71,7 @@ export default class Player {
   reset() {
     this.playTime = 0;
     this.isPlaying = false;
-    if(this.timmer) {
+    if(this.logicTimmer) {
       this.pause();
     }
 
