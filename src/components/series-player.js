@@ -57,8 +57,8 @@ export default class Player {
     }, this.simulator.interval);
 
     this.graphicTimmer = setInterval(() => {
-      this.render(this.frame);
-    }, 100);
+      this.render.render(this.frame);
+    }, this.render.interval);
   }
 
   pause() {

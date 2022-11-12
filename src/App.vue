@@ -28,6 +28,7 @@ import GpsSeries from './components/gps-series.js'
 import gpsPoints from './data/gps-points.json'
 import { SeriesSource } from './components/gps-source.js'
 import SeriesSimulator from './components/series-simulator.js'
+import AmapRender from './components/amap-render.js'
 import SeriesPlayer from './components/series-player.js'
 
 let map = null;
@@ -43,76 +44,13 @@ export default {
       player: null,
     }
   },
-  async created() {
-    this.route = new Route(routePoints);
-    const player = new SeriesPlayer();
-
-    const gpsSeries = new GpsSeries(gpsPoints);
-    const source = new SeriesSource(gpsSeries, 1000);
-
-    const simulator = new SeriesSimulator(50);
-    let gpsMarker = null;
-    let avgMarker = null;
-    let simulationMarker = null;
-    const render = function(frame) {
-      const { current } = frame.source;
-      if(current) {
-        const gpsPos = new AMap.LngLat(current.lng, current.lat);
-        if(!gpsMarker) {
-          gpsMarker = new AMap.CircleMarker({
-            center: gpsPos,
-            radius: 2,
-            strokeColor: 'green',
-            fillColor: 'green',
-          });
-          map.add(gpsMarker);
-        }
-        gpsMarker.setCenter(gpsPos);
-      }
-      
-      const { point, avgPoint } = frame.simulation;
-      if(avgPoint) {
-        const avgPos = new AMap.LngLat(avgPoint.lng, avgPoint.lat);
-        if(!avgMarker) {
-          avgMarker = new AMap.CircleMarker({
-            center: avgPos,
-            radius: 2,
-            strokeColor: 'yellow',
-            fillColor: 'yellow',
-          });
-          map.add(avgMarker);
-        }
-        avgMarker.setCenter(avgPos);
-      }
-      if(point) {
-        const simulatePos = new AMap.LngLat(point.lng, point.lat);
-        if(!simulationMarker) {
-          simulationMarker = new AMap.CircleMarker({
-            center: simulatePos,
-            radius: 2,
-            strokeColor: 'blue',
-            fillColor: 'blue',
-          });
-          map.add(simulationMarker);
-        }
-        simulationMarker.setCenter(simulatePos);
-        map.setCenter(simulatePos, true);
-      }
-    }
-
-    await player.init({
-      route: this.route,
-      source,
-      render,
-      simulator
-    });
-    this.player = player;
-  },
   async mounted() {
     await this.loadMapScript();
     await this.loadRoute();
     
     await this.initClickCorrection();
+
+    await this.initPlayer();
   },
   beforeDestroy() {
     this.player.pause();
@@ -145,6 +83,7 @@ export default {
     },
     async loadRoute() {
       const t0 = Date.now();
+      this.route = new Route(routePoints);
       this.route.setDistanceFunc((p0, p1) => {
         return AMap.GeometryUtil.distance([p0.lng, p0.lat], [p1.lng, p1.lat]);
       });
@@ -193,6 +132,26 @@ export default {
         line2CorrectedPoint.setPath([e.lnglat, nearestPoint]);
       });
     },
+    async initPlayer() {
+      // 初始化 GPS 源
+      const gpsSeries = new GpsSeries(gpsPoints);
+      const source = new SeriesSource(gpsSeries, 1000);
+      // 初始化模拟器
+      const simulator = new SeriesSimulator(50);
+      // 初始化渲染器
+      const render = new AmapRender(AMap, map, 100);
+
+      // 初始化播放器
+      const player = new SeriesPlayer();
+      // 播放器加载各模块
+      await player.init({
+        route: this.route,
+        source,
+        render,
+        simulator
+      });
+      this.player = player;
+    }
   }
 }
 </script>
