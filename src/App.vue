@@ -26,7 +26,7 @@ import Route from 'route-correction'
 import routePoints from './data/route-points.json'
 import GpsSeries from './components/gps-series.js'
 import gpsPoints from './data/gps-points.json'
-import GpsSource from './components/gps-source.js'
+import { SeriesSource } from './components/gps-source.js'
 import SeriesSimulator from './components/series-simulator.js'
 import SeriesPlayer from './components/series-player.js'
 
@@ -48,7 +48,7 @@ export default {
     const player = new SeriesPlayer();
 
     const gpsSeries = new GpsSeries(gpsPoints);
-    const source = new GpsSource(gpsSeries, 1000);
+    const source = new SeriesSource(gpsSeries, 1000);
 
     const simulator = new SeriesSimulator(50);
     let gpsMarker = null;
