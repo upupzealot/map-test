@@ -115,7 +115,7 @@ export default {
     
     await this.initClickCorrection();
   },
-  unmounted() {
+  beforeDestroy() {
     this.player.pause();
   },
   methods: {
