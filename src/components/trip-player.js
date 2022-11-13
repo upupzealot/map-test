@@ -80,8 +80,10 @@ export default class Player {
 
     const p0 = this.source.current;
     this.frame = {
-      player: this,
-      source: this.source,
+      ctx: {
+        player: this,
+        source: this.source,
+      },
       simulation: {
         point: {
           lng: p0.lng,

@@ -1,8 +1,9 @@
 import { wgs84togcj02 as Wgs84ToGcj02 } from 'coordtransform';
 
 class Source {
-  constructor(interval) {
+  constructor({ filters, interval }) {
     this.interval = interval;
+    this.filters = filters || [];
     this.last = null;
     this.current = null;
   }
@@ -22,15 +23,13 @@ class Source {
       this.last = this.current;
       this.current = point;
     }
-
-    return point;
   }
 }
 
 class SeriesSource extends Source {
-  constructor(series, interval) {
-    super(interval);
-    this.series = series;
+  constructor(opts) {
+    super(opts);
+    this.series = opts.series;
   }
 
   async fetchFunc(time) {
@@ -44,9 +43,9 @@ class SeriesSource extends Source {
 }
 
 class RealTimeSource extends Source {
-  constructor(fetchFunc, interval) {
-    super(interval);
-    this.fetchFunc = fetchFunc;
+  constructor(opts) {
+    super(opts);
+    this.fetchFunc = opts.fetchFunc;
   }
 }
 

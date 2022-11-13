@@ -1,5 +1,5 @@
 export default class AmapRender {
-  constructor(AMap, map, interval) {
+  constructor({ AMap, map, interval }) {
     this.AMap = AMap;
     this.map = map;
     this.interval = interval;
@@ -11,7 +11,7 @@ export default class AmapRender {
 
   render(frame) {
     const { AMap, map } = this;
-    const { current } = frame.source;
+    const { source: { current } } = frame.ctx;
     if(current) {
       const gpsPos = new AMap.LngLat(current.lng, current.lat);
       if(!this.gpsMarker) {

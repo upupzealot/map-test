@@ -4,7 +4,7 @@ export default class Simulator {
   }
 
   update(frame) {
-    const { player, source, simulation } = frame;
+    const { ctx: { player, source }, simulation } = frame;
     const { route } = player;
     const { last, current } = source;
     const { startAt, simulatedTime } = player;

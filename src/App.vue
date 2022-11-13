@@ -29,7 +29,7 @@ import gpsPoints from './data/gps-points.json'
 import { SeriesSource } from './components/gps-source.js'
 import MoveSimulator from './components/move-simulator.js'
 import AmapRender from './components/amap-render.js'
-import SeriesPlayer from './components/series-player.js'
+import TripPlayer from './components/trip-player.js'
 
 let map = null;
 
@@ -135,14 +135,20 @@ export default {
     async initPlayer() {
       // 初始化 GPS 源
       const gpsSeries = new GpsSeries(gpsPoints);
-      const source = new SeriesSource(gpsSeries, 1000);
+      const source = new SeriesSource({
+        series: gpsSeries,
+        interval: 1000,
+      });
       // 初始化模拟器
       const simulator = new MoveSimulator(50);
       // 初始化渲染器
-      const render = new AmapRender(AMap, map, 100);
+      const render = new AmapRender({
+        AMap, map,
+        interval: 100,
+      });
 
       // 初始化播放器
-      const player = new SeriesPlayer();
+      const player = new TripPlayer();
       // 播放器加载各模块
       await player.init({
         route: this.route,
