@@ -27,7 +27,7 @@ import routePoints from './data/route-points.json'
 import GpsSeries from './components/gps-series.js'
 import gpsPoints from './data/gps-points.json'
 import { SeriesSource } from './components/gps-source.js'
-import SeriesSimulator from './components/series-simulator.js'
+import MoveSimulator from './components/move-simulator.js'
 import AmapRender from './components/amap-render.js'
 import SeriesPlayer from './components/series-player.js'
 
@@ -137,7 +137,7 @@ export default {
       const gpsSeries = new GpsSeries(gpsPoints);
       const source = new SeriesSource(gpsSeries, 1000);
       // 初始化模拟器
-      const simulator = new SeriesSimulator(50);
+      const simulator = new MoveSimulator(50);
       // 初始化渲染器
       const render = new AmapRender(AMap, map, 100);
 
