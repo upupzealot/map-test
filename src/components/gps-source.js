@@ -4,8 +4,8 @@ class Source {
   constructor({ filters, interval }) {
     this.interval = interval;
     this.filters = filters || [];
-    this.last = null;
     this.current = null;
+    this.history = [];
   }
 
   fetchFunc(time) {
@@ -13,14 +13,20 @@ class Source {
   }
 
   async init() {
-    this.last = await this.fetchFunc(0);
-    this.current = this.last;
+    this.current = await this.fetchFunc(0);
+    this.history = [];
   }
 
   async update(time) {
     const point = await this.fetchFunc(time);
-    if(point.id !== this.current.id) {
-      this.last = this.current;
+    let pass = true;
+    for (let i = 0; i < this.filters.length; i++) {
+      const filter = this.filters[i];
+      pass = pass && filter.filter(point, this);
+      if(!pass) break;
+    }
+    if(pass) {
+      this.history.unshift(this.current);
       this.current = point;
     }
   }

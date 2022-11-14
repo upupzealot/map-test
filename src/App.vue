@@ -25,6 +25,7 @@ import amapConf from './amap.config.json'
 import Route from 'route-correction'
 import routePoints from './data/route-points.json'
 import GpsSeries from './components/gps-series.js'
+import GpsFilter from './components/gps-filter.js'
 import gpsPoints from './data/gps-points.json'
 import { SeriesSource } from './components/gps-source.js'
 import MoveSimulator from './components/move-simulator.js'
@@ -135,8 +136,13 @@ export default {
     async initPlayer() {
       // 初始化 GPS 源
       const gpsSeries = new GpsSeries(gpsPoints);
+      const gpsFilter = new GpsFilter({
+        range: 15,
+        ctx: { route: this.route },
+      });
       const source = new SeriesSource({
         series: gpsSeries,
+        filters: [gpsFilter],
         interval: 1000,
       });
       // 初始化模拟器
