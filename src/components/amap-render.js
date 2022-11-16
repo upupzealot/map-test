@@ -5,6 +5,24 @@ export default class AmapRender {
     this.icon = icon;
     this.interval = interval;
 
+    let pressed = false;
+    this.lockCamera = true;
+    map.on('mousedown', ({ target }) => {
+      if(target === this.map) {
+        pressed = true;
+      }
+    });
+    map.on('mousemove', () => {
+      if(pressed) {
+        this.lockCamera = false;
+      }
+    });
+    map.on('mouseup', ({ target }) => {
+      if(target === this.map) {
+        pressed = false;
+      }
+    });
+
     this.gpsMarker = null;
     this.avgMarker = null;
     this.simulationMarker = null;
@@ -43,13 +61,18 @@ export default class AmapRender {
         // 圆点图标
         // this.simulationMarker = this.creatMarker('blue', simulatePos);
         map.add(this.simulationMarker);
+        this.simulationMarker.on('click', () => {
+          this.lockCamera = true;
+        });
       }
       // 图片图标
       this.simulationMarker.setAngle(360 - frame.simulation.point.directionInDegree)
       this.simulationMarker.setPosition(simulatePos);
       // 圆点图标
       // this.simulationMarker.setCenter(simulatePos);
-      map.setCenter(simulatePos, true);
+      if(this.lockCamera) {
+        map.setCenter(simulatePos, true);
+      }
     }
   }
 
