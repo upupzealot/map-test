@@ -1,7 +1,8 @@
 export default class AmapRender {
-  constructor({ AMap, map, interval }) {
+  constructor({ AMap, map, icon, interval }) {
     this.AMap = AMap;
     this.map = map;
+    this.icon = icon;
     this.interval = interval;
 
     this.gpsMarker = null;
@@ -33,16 +34,27 @@ export default class AmapRender {
     if(point) {
       const simulatePos = new AMap.LngLat(point.lng, point.lat);
       if(!this.simulationMarker) {
-        this.simulationMarker = this.creatMarker('blue', simulatePos);
+        // 图片图标
+        this.simulationMarker = new AMap.Marker({
+          position: simulatePos, 
+          setzIndex: 6,
+        });
+        this.simulationMarker.setContent(this.icon);
+        // 圆点图标
+        // this.simulationMarker = this.creatMarker('blue', simulatePos);
         map.add(this.simulationMarker);
       }
-      this.simulationMarker.setCenter(simulatePos);
+      // 图片图标
+      this.simulationMarker.setAngle(360 - frame.simulation.point.directionInDegree)
+      this.simulationMarker.setPosition(simulatePos);
+      // 圆点图标
+      // this.simulationMarker.setCenter(simulatePos);
       map.setCenter(simulatePos, true);
     }
   }
 
   creatMarker(color, position) {
-    const marker = new AMap.CircleMarker({
+    const marker = new this.AMap.CircleMarker({
       center: position,
       radius: 4,
       strokeColor: color,

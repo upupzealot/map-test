@@ -6,6 +6,7 @@
       @pause="()=>{ player && player.pause() }"
       @stop="()=>{ player && player.reset() }"
     />
+    <img :src="iconUrl" width="50" height="50" />
   </div>
 </template>
 
@@ -18,6 +19,7 @@
 
 <script>
 import PlayBar from './components/playbar'
+import iconUrl from './assets/police-car.png'
 
 // import { wgs84togcj02 as Wgs84ToGcj02 } from 'coordtransform';
 import amapConf from './amap.config.json'
@@ -39,6 +41,7 @@ export default {
   components: { PlayBar },
   data() {
     return {
+      iconUrl,
       scriptLoaded: false,
       map: null,
       route: null,
@@ -148,9 +151,15 @@ export default {
       // 初始化模拟器
       const simulator = new MoveSimulator(50);
       // 初始化渲染器
+      const imgEle = document.createElement('img');
+      imgEle.setAttribute('src', this.iconUrl);
+      imgEle.setAttribute('width', 50);
+      imgEle.setAttribute('height', 50);
+      imgEle.setAttribute('style', 'opacity: .5; transform: translate(0, 25px) rotate(90deg);')
       const render = new AmapRender({
         AMap, map,
-        interval: 100,
+        icon: imgEle,
+        interval: 60,
       });
 
       // 初始化播放器
