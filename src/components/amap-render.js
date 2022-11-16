@@ -5,21 +5,10 @@ export default class AmapRender {
     this.icon = icon;
     this.interval = interval;
 
-    let pressed = false;
     this.lockCamera = true;
-    map.on('mousedown', ({ target }) => {
+    map.on('dragstart', ({ target }) => {
       if(target === this.map) {
-        pressed = true;
-      }
-    });
-    map.on('mousemove', () => {
-      if(pressed) {
         this.lockCamera = false;
-      }
-    });
-    map.on('mouseup', ({ target }) => {
-      if(target === this.map) {
-        pressed = false;
       }
     });
 
