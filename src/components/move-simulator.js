@@ -11,6 +11,7 @@ export default class Simulator {
     const simulatedNow = startAt + simulatedTime;
     
     let distance = simulation.distance || 0;
+    let lastDistance = simulation.lastDistance || 0;
     let avgDistance = simulation.avgDistance || 0;
     let speed = simulation.speed || 0;
     
@@ -60,10 +61,12 @@ export default class Simulator {
     speed = Math.max(0, speed);
     speed = Math.min(speed, (120 / 3.6));
     
+    lastDistance = distance;
     distance += speed * dt;
     console.log((speed * 3.6).toFixed(2), disDiff.toFixed(2));
     
     simulation.speed = speed;
+    simulation.lastDistance = lastDistance;
     simulation.distance = distance;
     simulation.point = route.pointAt(distance);
     simulation.avgDistance = avgDistance;

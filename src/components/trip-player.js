@@ -10,6 +10,7 @@ export default class Player {
 
     this.route = null;
     this.source = null;
+    this.triggers = [];
     this.render = null;
     this.simulator = null;
     this.logicTimmer = null;
@@ -19,10 +20,12 @@ export default class Player {
   async init({
       route,
       source,
+      triggers,
       render,
       simulator }) {
     this.route = route;
     this.source = source;
+    this.triggers = triggers;
     this.simulator = simulator;
     this.render = render;
 
@@ -52,6 +55,14 @@ export default class Player {
         this.frame = this.simulator.update(this.frame, interval);
         this.simulatedTime += interval;
       }
+
+      // 更新 triggers
+      this.triggers.forEach(trigger => {
+        const triggered = trigger.test(this.frame.simulation);
+        if(triggered) {
+          trigger.callback();
+        }
+      });
 
       last = now;
     }, this.simulator.interval);

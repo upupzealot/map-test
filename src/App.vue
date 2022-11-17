@@ -26,10 +26,12 @@ import amapConf from './amap.config.json'
 
 import Route from 'route-correction'
 import routePoints from './data/route-points.json'
+import tunnels from './data/tunnels.json'
 import GpsSeries from './components/gps-series.js'
 import GpsFilter from './components/gps-filter.js'
 import gpsPoints from './data/gps-points.json'
 import { SeriesSource } from './components/gps-source.js'
+import { DistanceTrigger } from './components/trigger.js'
 import MoveSimulator from './components/move-simulator.js'
 import AmapRender from './components/amap-render.js'
 import TripPlayer from './components/trip-player.js'
@@ -45,12 +47,14 @@ export default {
       scriptLoaded: false,
       map: null,
       route: null,
+      tunnels: [],
       player: null,
     }
   },
   async mounted() {
     await this.loadMapScript();
     await this.loadRoute();
+    await this.loadTunnels();
     
     await this.initClickCorrection();
 
@@ -105,6 +109,44 @@ export default {
       map.setFitView(); // 视野自适应
       console.log(`加载路线耗时：${Date.now() - t0} ms`, )
     },
+    async loadTunnels() {
+      for (let i = 0; i < tunnels.length; i++) {
+        let { start, end } = tunnels[i];
+        const corrections = [start, end].map(point => {
+          return this.route.correct(point);
+        }).sort((c0, c1) => {
+          return c0.distance - c1.distance;
+        });
+        
+        const [startCorrection, endCorrection] = corrections;
+        const { segments } = this.route;
+        let tunnelPath = [];
+        for (let i = startCorrection.index; i < endCorrection.index; i++) {
+          tunnelPath.push(segments[i].p1);
+        }
+        tunnelPath = [
+          startCorrection.point,
+          ...tunnelPath,
+          endCorrection.point,
+        ];
+        const tunnelPoints = tunnelPath.map(p => new AMap.LngLat(p.lng, p.lat));
+        this.tunnels.push({
+          start: startCorrection,
+          end: endCorrection,
+          points: tunnelPoints,
+        });
+
+        const tunnelLine = new AMap.Polyline({
+          path: tunnelPoints,  
+          strokeWeight: 10,    // 线条宽度，默认为 1
+          strokeColor: '#00B2D5', // 线条颜色
+          strokeOpacity: .5,   // 线条透明度
+          lineJoin: 'round',   // 折线拐点连接处样式
+          lineCap: 'round',    // 折线两端线帽的绘制样式
+        });
+        map.add(tunnelLine);
+      }
+    },
     async initClickCorrection() {
       let correctedPoint = null;
       let line2CorrectedPoint = null;
@@ -150,6 +192,12 @@ export default {
       });
       // 初始化模拟器
       const simulator = new MoveSimulator(50);
+      // 初始化触发器
+      const triggers = this.tunnels.map(tunnel => {
+        return new DistanceTrigger(tunnel.start.distance, ()=>{
+          console.log('进入隧道');
+        });
+      })
       // 初始化渲染器
       const imgEle = document.createElement('img');
       imgEle.setAttribute('src', this.iconUrl);
@@ -168,6 +216,7 @@ export default {
       await player.init({
         route: this.route,
         source,
+        triggers,
         render,
         simulator
       });
