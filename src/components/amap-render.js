@@ -1,9 +1,11 @@
 export default class AmapRender {
-  constructor({ AMap, map, icon, interval }) {
+  constructor({ AMap, map, icon, rotateIcon, interval, debug }) {
     this.AMap = AMap;
     this.map = map;
     this.icon = icon;
+    this.rotateIcon = rotateIcon;
     this.interval = interval;
+    this.debug = debug;
 
     this.lockCamera = true;
     map.on('dragstart', ({ target }) => {
@@ -18,9 +20,9 @@ export default class AmapRender {
   }
 
   render(frame) {
-    const { AMap, map } = this;
+    const { AMap, map, debug } = this;
     const { source: { current } } = frame.ctx;
-    if(current) {
+    if(current && debug) {
       const gpsPos = new AMap.LngLat(current.lng, current.lat);
       if(!this.gpsMarker) {
         this.gpsMarker = this.creatMarker('green', gpsPos);
@@ -30,7 +32,7 @@ export default class AmapRender {
     }
     
     const { point, avgPoint } = frame.simulation;
-    if(avgPoint) {
+    if(avgPoint && debug) {
       const avgPos = new AMap.LngLat(avgPoint.lng, avgPoint.lat);
       if(!this.avgMarker) {
         this.avgMarker = this.creatMarker('yellow', avgPos);
@@ -41,30 +43,37 @@ export default class AmapRender {
     if(point) {
       const simulatePos = new AMap.LngLat(point.lng, point.lat);
       if(!this.simulationMarker) {
-        // 图片图标
-        this.simulationMarker = new AMap.Marker({
-          position: simulatePos, 
-          setzIndex: 6,
-        });
-        this.simulationMarker.setContent(this.icon);
-        // 圆点图标
-        // this.simulationMarker = this.creatMarker('blue', simulatePos);
+        if(debug) {
+          // 圆点图标
+          this.simulationMarker = this.creatMarker('blue', simulatePos);
+        } else {
+          // 图片图标
+          this.simulationMarker = new AMap.Marker({
+            position: simulatePos, 
+            setzIndex: 6,
+          });
+          this.simulationMarker.setContent(this.icon);
+        }
+        
         map.add(this.simulationMarker);
         this.simulationMarker.on('click', () => {
           this.lockCamera = true;
         });
       }
-      // 图片图标
-      // this.simulationMarker.setAngle(360 - frame.simulation.point.directionInDegree)
-      const icon = this.icon.lastChild;
-      icon.setAttribute('style', `transform: rotate(${90 - frame.simulation.point.directionInDegree}deg);`);
-      this.simulationMarker.setPosition(simulatePos);
+      // 图片图标：旋转
+      if(!debug && this.icon && this.rotateIcon) {
+        this.rotateIcon(frame.simulation.point.directionInDegree);
+      }
+      // 平移
+      if(debug) {
+        this.simulationMarker.setCenter(simulatePos);
+      } else {
+        this.simulationMarker.setPosition(simulatePos);
+      }
       
+      // 镜头跟随
       if(this.lockCamera) {
-        // 图片图标
         map.setCenter(simulatePos, true);
-        // 圆点图标
-        // this.simulationMarker.setCenter(simulatePos);
       }
     }
   }

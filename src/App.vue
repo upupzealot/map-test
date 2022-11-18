@@ -231,7 +231,11 @@ export default {
       const render = new AmapRender({
         AMap, map,
         icon: divEle,
+        rotateIcon: degree => {
+          imgEle.setAttribute('style', `transform: rotate(${90 - degree}deg);`);
+        },
         interval: 60,
+        // debug: true
       });
       // 初始化触发器
       let triggers = [];
