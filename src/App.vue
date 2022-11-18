@@ -25,10 +25,10 @@
 .marker-content .note{
   width: 200px;
   position: absolute;
-  left: -75px;
+  left: -75px; /* 100px / 2 - 50px / 2 = 75px */
   top: -20px;
 
-  background-color: rgba(0,0,0,.6);
+  background-color: rgba(0, 0, 0, .6);
   color: white;
   border-radius: 4px;
   text-align: center;
