@@ -15,6 +15,30 @@
 .amap-copyright {
   opacity: 0;
 }
+
+.marker-content {
+  transform: translate(0, 25px);
+}
+.marker-content img {
+  transition: all .5s;
+}
+.marker-content .note{
+  width: 200px;
+  position: absolute;
+  left: -75px;
+  top: -20px;
+
+  background-color: rgba(0,0,0,.6);
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+}
+.marker-content .note.show  {
+  display: block;
+}
+.marker-content .note.hide  {
+  display: none;
+}
 </style>
 
 <script>
@@ -192,23 +216,33 @@ export default {
       });
       // 初始化模拟器
       const simulator = new MoveSimulator(50);
-      // 初始化触发器
-      const triggers = this.tunnels.map(tunnel => {
-        return new DistanceTrigger(tunnel.start.distance, ()=>{
-          console.log('进入隧道');
-        });
-      })
       // 初始化渲染器
       const imgEle = document.createElement('img');
       imgEle.setAttribute('src', this.iconUrl);
       imgEle.setAttribute('width', 50);
       imgEle.setAttribute('height', 50);
-      imgEle.setAttribute('style', 'opacity: .5; transform: translate(0, 25px) rotate(90deg);')
+      const noteEle = document.createElement('div');
+      noteEle.setAttribute('class', 'note hide');
+      noteEle.innerHTML = '<span>隧道行驶中，无 GPS 信号...</span>'
+      const divEle = document.createElement('div');
+      divEle.setAttribute('class', 'marker-content');
+      divEle.append(noteEle);
+      divEle.append(imgEle);
       const render = new AmapRender({
         AMap, map,
-        icon: imgEle,
+        icon: divEle,
         interval: 60,
       });
+      // 初始化触发器
+      let triggers = [];
+      this.tunnels.forEach(tunnel => {
+        triggers.push(new DistanceTrigger(tunnel.start.distance, ()=>{
+          noteEle.setAttribute('class', 'note show');
+        }));
+        triggers.push(new DistanceTrigger(tunnel.end.distance, ()=>{
+          noteEle.setAttribute('class', 'note hide');
+        }));
+      })
 
       // 初始化播放器
       const player = new TripPlayer();

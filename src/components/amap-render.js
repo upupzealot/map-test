@@ -55,12 +55,16 @@ export default class AmapRender {
         });
       }
       // 图片图标
-      this.simulationMarker.setAngle(360 - frame.simulation.point.directionInDegree)
+      // this.simulationMarker.setAngle(360 - frame.simulation.point.directionInDegree)
+      const icon = this.icon.lastChild;
+      icon.setAttribute('style', `transform: rotate(${90 - frame.simulation.point.directionInDegree}deg);`);
       this.simulationMarker.setPosition(simulatePos);
-      // 圆点图标
-      // this.simulationMarker.setCenter(simulatePos);
+      
       if(this.lockCamera) {
+        // 图片图标
         map.setCenter(simulatePos, true);
+        // 圆点图标
+        // this.simulationMarker.setCenter(simulatePos);
       }
     }
   }
