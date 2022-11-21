@@ -15,30 +15,6 @@
 .amap-copyright {
   opacity: 0;
 }
-
-.marker-content {
-  transform: translate(0, 25px);
-}
-.marker-content img {
-  transition: all .5s;
-}
-.marker-content .note{
-  width: 200px;
-  position: absolute;
-  left: -75px; /* 100px / 2 - 50px / 2 = 75px */
-  top: -20px;
-
-  background-color: rgba(0, 0, 0, .6);
-  color: white;
-  border-radius: 4px;
-  text-align: center;
-}
-.marker-content .note.show  {
-  display: block;
-}
-.marker-content .note.hide  {
-  display: none;
-}
 </style>
 
 <script>
@@ -198,6 +174,9 @@ export default {
       });
     },
     async initPlayer() {
+      // 初始化播放器
+      const player = new TP();
+
       // 初始化 GPS 源
       const gpsSeries = new TP.GpsSeries(gpsPoints);
       const gpsFilter = new TP.RangeFilter({
@@ -212,22 +191,13 @@ export default {
       // 初始化模拟器
       const simulator = new TP.MoveSimulator(50);
       // 初始化渲染器
-      const imgEle = document.createElement('img');
-      imgEle.setAttribute('src', this.iconUrl);
-      imgEle.setAttribute('width', 50);
-      imgEle.setAttribute('height', 50);
-      const noteEle = document.createElement('div');
-      noteEle.setAttribute('class', 'note hide');
-      noteEle.innerHTML = '<span>隧道行驶中，无 GPS 信号...</span>'
-      const divEle = document.createElement('div');
-      divEle.setAttribute('class', 'marker-content');
-      divEle.append(noteEle);
-      divEle.append(imgEle);
       const render = new AmapRender({
         AMap, map,
-        icon: divEle,
-        rotateIcon: degree => {
-          imgEle.setAttribute('style', `transform: rotate(${90 - degree}deg);`);
+        icon: {
+          url: this.iconUrl,
+          width: 50,
+          height: 50,
+          rotation: 90,
         },
         interval: 60,
         // debug: true
@@ -235,16 +205,21 @@ export default {
       // 初始化触发器
       let triggers = [];
       this.tunnels.forEach(tunnel => {
-        triggers.push(new TP.DistanceTrigger(tunnel.start.distance, ()=>{
-          noteEle.setAttribute('class', 'note show');
+        triggers.push(new TP.DistanceTrigger(tunnel.start.distance, player =>{
+          player.emit('enter-tunnel'); // 触发进入隧道自定义事件
         }));
-        triggers.push(new TP.DistanceTrigger(tunnel.end.distance, ()=>{
-          noteEle.setAttribute('class', 'note hide');
+        triggers.push(new TP.DistanceTrigger(tunnel.end.distance, player =>{
+          player.emit('exit-tunnel'); // 触发进入隧道自定义事件
         }));
-      })
+      });
+      // 监听进出隧道事件
+      player.on('enter-tunnel', () => {
+        player.frame.tunnelTipVisible = true;
+      });
+      player.on('exit-tunnel', () => {
+        player.frame.tunnelTipVisible = false;
+      });
 
-      // 初始化播放器
-      const player = new TP();
       // 播放器加载各模块
       await player.init({
         route: this.route,

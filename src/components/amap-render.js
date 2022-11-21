@@ -1,9 +1,8 @@
 export default class AmapRender {
-  constructor({ AMap, map, icon, rotateIcon, interval, debug }) {
+  constructor({ AMap, map, icon, interval, debug }) {
     this.AMap = AMap;
     this.map = map;
     this.icon = icon;
-    this.rotateIcon = rotateIcon;
     this.interval = interval;
     this.debug = debug;
 
@@ -17,6 +16,8 @@ export default class AmapRender {
     this.gpsMarker = null;
     this.avgMarker = null;
     this.simulationMarker = null;
+    this.imgEle = null;
+    this.noteEle = null;
   }
 
   render(frame) {
@@ -52,7 +53,31 @@ export default class AmapRender {
             position: simulatePos, 
             setzIndex: 6,
           });
-          this.simulationMarker.setContent(this.icon);
+          const imgEle = document.createElement('img');
+          imgEle.setAttribute('src', this.icon.url);
+          imgEle.setAttribute('width', this.icon.width || 50);
+          imgEle.setAttribute('height', this.icon.height || 50);
+          imgEle.setAttribute('style', 'transition: all .5s;')
+          this.imgEle = imgEle;
+          const noteEle = document.createElement('div');
+          noteEle.innerHTML = '<span>隧道行驶中，无 GPS 信号...</span>'
+          noteEle.setAttribute('style', `
+            width: 200px;
+            position: absolute;
+            left: -75px;
+            top: -20px;
+          
+            background-color: rgba(0, 0, 0, .6);
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+          `)
+          this.noteEle = noteEle;
+          const divEle = document.createElement('div');
+          divEle.setAttribute('style', 'transform: translate(0, 25px)');
+          divEle.append(noteEle);
+          divEle.append(imgEle);
+          this.simulationMarker.setContent(divEle);
         }
         
         map.add(this.simulationMarker);
@@ -61,8 +86,9 @@ export default class AmapRender {
         });
       }
       // 图片图标：旋转
-      if(!debug && this.icon && this.rotateIcon) {
-        this.rotateIcon(frame.simulation.point.directionInDegree);
+      if(!debug && this.icon) {
+        const degree = frame.simulation.point.directionInDegree;
+        this.imgEle.setAttribute('style', `transform: rotate(${this.icon.rotation - degree}deg);`);
       }
       // 平移
       if(debug) {
@@ -74,6 +100,13 @@ export default class AmapRender {
       // 镜头跟随
       if(this.lockCamera) {
         map.setCenter(simulatePos, true);
+      }
+
+      // 隧道形式提示开关
+      if(frame.tunnelTipVisible) {
+        this.noteEle.removeAttribute('hidden');
+      } else {
+        this.noteEle.setAttribute('hidden', 'hidden');
       }
     }
   }

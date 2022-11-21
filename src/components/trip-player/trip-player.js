@@ -1,6 +1,3 @@
-// 播放器
-import TripPlayer from './trip-player'
-
 // 路线
 import Route from 'route-correction'
 
@@ -64,16 +61,18 @@ export default class Player {
     await this.reset();
   }
 
-  on(topic, callback) {
-    if(callback) {
+  // 增加自定义事件监听器
+  on(topic, listener) {
+    if(listener) {
       if(!this.listeners[topic]) {
         this.listeners[topic] = [];
       }
 
-      this.listeners[topic].push(callback);
+      this.listeners[topic].push(listener);
     }
   }
 
+  // 触发自定义事件
   async emit(topic, value) {
     const listeners = this.listeners[topic];
     listeners.forEach(async listener => {
@@ -108,7 +107,7 @@ export default class Player {
       this.triggers.forEach(trigger => {
         const triggered = trigger.test(this.frame.simulation);
         if(triggered) {
-          trigger.callback();
+          trigger.callback(this);
         }
       });
 
