@@ -29,7 +29,7 @@ import routePoints from './data/route-points.json'
 import tunnels from './data/tunnels.json'
 import gpsPoints from './data/gps-points.json'
 import AmapRender from './components/amap-render.js'
-import TP from './components/trip-player/trip-player.js'
+import TP from 'trip-player'
 
 let map = null;
 
