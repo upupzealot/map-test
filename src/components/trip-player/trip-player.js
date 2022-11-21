@@ -1,7 +1,36 @@
+// 播放器
+import TripPlayer from './trip-player'
+
+// 路线
+import Route from 'route-correction'
+
+// GPS 数据源
+// 1.SeriesSource：（已录制的）GPS 序列作为数据源
+// 2.RealTimeSource：实时 GPS 上报
+import { SeriesSource, RealTimeSource } from './gps-source'
+// GPS 上报序列，被 SeriesSource 所使用
+import GpsSeries from './gps-series'
+// GPS 上报点位过滤器
+import RangeFilter from './range-filter'
+
+// 运动模拟器
+import MoveSimulator from './move-simulator'
+
+// 触发器
+// 1.距离触发器
+import { DistanceTrigger } from './trigger'
+
 export default class Player {
+  static Route = Route;
+  static SeriesSource = SeriesSource;
+  static GpsSeries = GpsSeries;
+  static RealTimeSource = RealTimeSource;
+  static RangeFilter = RangeFilter;
+  static MoveSimulator = MoveSimulator;
+  static DistanceTrigger = DistanceTrigger;
+
   constructor() {
     this.series = null;
-    this.totalTime = 0;
     this.startAt = 0;
     this.playTime = 0;
     this.isPlaying = false;
@@ -15,6 +44,8 @@ export default class Player {
     this.simulator = null;
     this.logicTimmer = null;
     this.graphicTimmer = null;
+
+    this.listeners = {};
   }
 
   async init({
@@ -31,6 +62,23 @@ export default class Player {
 
     await this.source.init();
     await this.reset();
+  }
+
+  on(topic, callback) {
+    if(callback) {
+      if(!this.listeners[topic]) {
+        this.listeners[topic] = [];
+      }
+
+      this.listeners[topic].push(callback);
+    }
+  }
+
+  async emit(topic, value) {
+    const listeners = this.listeners[topic];
+    listeners.forEach(async listener => {
+      await listener(value);
+    });
   }
 
   start() {
@@ -67,6 +115,7 @@ export default class Player {
       last = now;
     }, this.simulator.interval);
 
+    // 更新图像
     this.graphicTimmer = setInterval(() => {
       this.render.render(this.frame);
     }, this.render.interval);

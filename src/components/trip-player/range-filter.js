@@ -1,4 +1,4 @@
-export default class Filter {
+export default class RangeFilter {
   constructor({ range, ctx }) {
     this.range = range || 0;
     this.route = ctx.route;

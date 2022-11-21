@@ -51,14 +51,9 @@ import amapConf from './amap.config.json'
 import Route from 'route-correction'
 import routePoints from './data/route-points.json'
 import tunnels from './data/tunnels.json'
-import GpsSeries from './components/gps-series.js'
-import GpsFilter from './components/gps-filter.js'
 import gpsPoints from './data/gps-points.json'
-import { SeriesSource } from './components/gps-source.js'
-import { DistanceTrigger } from './components/trigger.js'
-import MoveSimulator from './components/move-simulator.js'
 import AmapRender from './components/amap-render.js'
-import TripPlayer from './components/trip-player.js'
+import TP from './components/trip-player/trip-player.js'
 
 let map = null;
 
@@ -204,18 +199,18 @@ export default {
     },
     async initPlayer() {
       // 初始化 GPS 源
-      const gpsSeries = new GpsSeries(gpsPoints);
-      const gpsFilter = new GpsFilter({
+      const gpsSeries = new TP.GpsSeries(gpsPoints);
+      const gpsFilter = new TP.RangeFilter({
         range: 15,
         ctx: { route: this.route },
       });
-      const source = new SeriesSource({
+      const source = new TP.SeriesSource({
         series: gpsSeries,
         filters: [gpsFilter],
         interval: 1000,
       });
       // 初始化模拟器
-      const simulator = new MoveSimulator(50);
+      const simulator = new TP.MoveSimulator(50);
       // 初始化渲染器
       const imgEle = document.createElement('img');
       imgEle.setAttribute('src', this.iconUrl);
@@ -240,16 +235,16 @@ export default {
       // 初始化触发器
       let triggers = [];
       this.tunnels.forEach(tunnel => {
-        triggers.push(new DistanceTrigger(tunnel.start.distance, ()=>{
+        triggers.push(new TP.DistanceTrigger(tunnel.start.distance, ()=>{
           noteEle.setAttribute('class', 'note show');
         }));
-        triggers.push(new DistanceTrigger(tunnel.end.distance, ()=>{
+        triggers.push(new TP.DistanceTrigger(tunnel.end.distance, ()=>{
           noteEle.setAttribute('class', 'note hide');
         }));
       })
 
       // 初始化播放器
-      const player = new TripPlayer();
+      const player = new TP();
       // 播放器加载各模块
       await player.init({
         route: this.route,
